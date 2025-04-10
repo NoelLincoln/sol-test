@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mint NFT on Solana</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    button {
+      padding: 15px 30px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Mint Your NFT on Solana</h1>
+  <p>Click the button to mint your NFT</p>
+  <button id="mintButton">Mint cuckg NFT</button>
+
+  <!-- <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.29.1/dist/web3.min.js"></script> -->
+  <!-- <script src="https://unpkg.com/@solana/web3.js@1.29.1/dist/web3.min.js"></script> -->
+
+  <script src="web3.min.js"></script>
+
+  <script>
+    const mintButton = document.getElementById('mintButton');
+    
+    // NFT metadata
+    const NFT_METADATA = {
+      name: "CUCKG",
+      image: "https://asset.cloudinary.com/dwpjvkfoz/3acfe8b28fb68c05403f3e8fa72e3dab", // Your card image URL
+      description: "cuckg"
+    };
+
+    // Crossmint API details
+    const COLLECTION_ID = '8a73b289-5079-46b0-9a43-0ff3160d6f6e'; // Your Crossmint collection ID
+    const API_KEY = 'sk_staging_665v4p3ctHquxh6pS5q4Ei3Ykkcu1V7cEpnJqwCPYagHtAGPLd1r5vc8kaL6cH8GK659baeokNPddVdByrcJuxdHFVd5oU8vcwuvVqEJHss7oMfrabg5dxnZ2tJAgdxjAMcf89qLdgcgWwJgUdfH7TGNrtCjSmPApqdsVvavnejc7dMZ52FP6eU4ewEfTusmnJKRNfSdNNpTjL6SW1kkAXC9'; // Your Crossmint API key
+
+    // Function to mint the NFT
+    async function mintNFT() {
+      try {
+        // Check if Phantom wallet is available
+        const provider = window.solana;
+        if (!provider || !provider.isPhantom) {
+          throw new Error('Phantom wallet is not installed or not available');
+        }
+
+        // Connect to Phantom wallet
+        await provider.connect();
+        console.log('Connected to wallet:', provider.publicKey.toString());
+
+        const recipientAddress = provider.publicKey.toString();
+
+        // Check if wallet address is available
+        if (!recipientAddress) {
+          throw new Error('Failed to retrieve wallet address');
+        }
+
+        // Make a request to the Crossmint API to mint the NFT
+        const response = await fetch(`https://staging.crossmint.com/api/2022-06-09/collections/${COLLECTION_ID}/nfts`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': API_KEY
+          },
+          body: JSON.stringify({
+            recipient: `solana:${recipientAddress}`,
+            metadata: NFT_METADATA
+          })
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.status === 'success') {
+          alert('NFT Minted Successfully!');
+        } else {
+          throw new Error('Minting failed: ' + (result.message || 'Unknown error'));
+        }
+
+        console.log('Minting Result:', result);
+      } catch (error) {
+        console.error('Error during minting:', error);
+        alert('Something went wrong: ' + error.message);
+      }
+    }
+
+    // Attach the minting function to the button click event
+    mintButton.addEventListener('click', mintNFT);
+  </script>
+</body>
+</html>
